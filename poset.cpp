@@ -141,9 +141,11 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
    // is now bigger than the first
    for(auto i : std::get<1>(poset_set().at(id)).at(strId2).second) {
     std::get<1>(poset_set().at(id)).at(strId1).second.insert(i);
+    std::get<1>(poset_set().at(id)).at(i).first.insert(strId1);
    }
     for(auto i : std::get<1>(poset_set().at(id)).at(strId1).first) {
     std::get<1>(poset_set().at(id)).at(strId2).first.insert(i);
+    std::get<1>(poset_set().at(id)).at(i).second.insert(strId2);
    }
    // every element smaller than the first element
    // is now smaller than the second
