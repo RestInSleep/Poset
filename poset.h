@@ -1,5 +1,5 @@
-#ifndef poset.h
-#define poset.h
+#ifndef poset
+#define poset
 
 #ifdef __cplusplus
 #include <iostream>
@@ -7,6 +7,7 @@
 
 
 #include <stdlib.h>
+#include <stdbool.h>
 
   #ifdef __cplusplus
 namespace cxx {
