@@ -67,8 +67,10 @@ bool isStringAnElement(const string& str, const poset_t& poset) {
 bool compareStrings(const string& s1, string& s2, poset_t& poset) {
     if (s1 == s2)
         return true;
+
     unsigned long id_1 = get<0>(poset).at(s1);
     unsigned long id_2 = get<0>(poset).at(s2);
+    
     return get<1>(poset).at(id_1).second.find(id_2) != 
            get<1>(poset).at(id_1).second.end();
     }
@@ -88,13 +90,13 @@ void set_elements_relations(unsigned long pos_id, unsigned long str_id_1, unsign
         get<1>(poset_set().at(pos_id)).at(str_id_1).second.insert(i);
         get<1>(poset_set().at(pos_id)).at(i).first.insert(str_id_1);
         
-        for(auto j : get<1>(poset_set().at(pos_id)).at(str_id_1).first) {
+        for (auto j : get<1>(poset_set().at(pos_id)).at(str_id_1).first) {
             get<1>(poset_set().at(pos_id)).at(j).second.insert(i);
             get<1>(poset_set().at(pos_id)).at(i).first.insert(j);
         }
     }
     
-    for(auto i : get<1>(poset_set().at(pos_id)).at(str_id_1).first) {
+    for (auto i : get<1>(poset_set().at(pos_id)).at(str_id_1).first) {
         get<1>(poset_set().at(pos_id)).at(str_id_2).first.insert(i);
         get<1>(poset_set().at(pos_id)).at(i).second.insert(str_id_2);
     }
@@ -115,9 +117,6 @@ void rem_aux(unsigned long pos_id, string& str, unsigned long str_id) {
     // usuwamy z map stringa i jego id.
     get<0>(poset_set().at(pos_id)).erase(str);
     get<1>(poset_set().at(pos_id)).erase(str_id);
-
-
-
 
 }
 
@@ -161,7 +160,9 @@ void poset_delete(unsigned long id) {
         if constexpr (debug) {
             cout << "poset_delete: poset " << id << " deleted\n";
         }
+        
         poset_set().erase(id);
+        
         return;
     }
 
@@ -179,7 +180,6 @@ size_t poset_size(unsigned long id) {
     }
 
     if (is_poset_present(id)) {
-
         size_t size = get<0>(poset_set().at(id)).size();
 
         if constexpr (debug) {
@@ -204,6 +204,7 @@ bool poset_insert(unsigned long id, char const *value) {
                 cout << "poset_insert(" << id << ", " << "NULL)\n";
                 cout << "poset_insert: invalid value (NULL)\n";
             }
+
             return false;
         }
 
@@ -226,8 +227,8 @@ bool poset_insert(unsigned long id, char const *value) {
        
         if constexpr (debug) {
             cout << "poset_insert: poset " << id << ", element \"" << str <<"\" already exists\n";
-
         }
+
         return false;
      }
 
@@ -240,7 +241,7 @@ bool poset_insert(unsigned long id, char const *value) {
     get<1>(poset_set().at(id)).insert({str_id, std::make_pair(smaller, bigger)});
 
     if constexpr (debug) {
-        cout << "poset_insert: poset " << 0 << ", element \"" << str << "\" inserted\n";
+        cout << "poset_insert: poset " << id << ", element \"" << str << "\" inserted\n";
     }
 
     return true;
@@ -250,33 +251,32 @@ bool poset_insert(unsigned long id, char const *value) {
 
 bool poset_remove(unsigned long id, char const *value) {
     
-
     if constexpr (debug) {
         cout << "poset_remove(" << id << ", \"" << value << "\")\n";
     }
 
     if (!is_poset_present(id)) {
-
         if constexpr (debug) {
             cout << "poset_remove: poset " << id << " does not exist\n";
         }
+
         return false;
     }
     if (value == NULL) {
-        
         if constexpr (debug) {
             cout << "poset_remove: invalid value (NULL)\n";
         }
+
         return false;
     }
 
     string str{value};
 
     if (!isStringAnElement(str, poset_set().at(id))) {
-        
         if constexpr (debug) {
             cout << "poset_remove: poset " << id <<", element \"" << str << "\" does not exist\n";
         }
+
         return false;
     }
 
@@ -304,6 +304,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_add: poset " << id << " does not exist\n"; 
         }
+
         return false;
     }
 
@@ -312,6 +313,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
             cout << "poset_add: invalid value1 (NULL)\n";
             cout << "poset_add: invalid value2 (NULL)\n"; 
         }
+
         return false;
     }
 
@@ -319,6 +321,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_add: invalid value1 (NULL)\n";
         }
+
         return false;
     }
     
@@ -326,6 +329,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_add: invalid value2 (NULL)\n"; 
         }
+
         return false;
     }
 
@@ -336,6 +340,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_add: poset " << id << ", element \"" << str1 << "\" does not exist\n"; 
         }
+
         return false;
     }
    
@@ -343,6 +348,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_add: poset " << id << ", element \"" << str2 << "\" does not exist\n"; 
         }
+
         return false;
     }
 
@@ -352,9 +358,10 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
     //check if elements are in a relation
     if (compareStrings(str1, str2, poset_set().at(id)) or
         compareStrings(str2, str1, poset_set().at(id))) {
-        
+
         if constexpr (debug) {
-            cout << "poset_add: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") cannot be added\n";
+            cout << "poset_add: poset " << id << ", relation (\"" <<
+                    str1 << "\", \"" << str2 << "\") cannot be added\n";
         }
 
         return false;
@@ -364,7 +371,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
 
     if constexpr (debug) {
         cout << "poset_add: poset " << id <<
-            ", relation (\"" << str1 << "\", \"" << str2 << "\") added\n";
+                ", relation (\"" << str1 << "\", \"" << str2 << "\") added\n";
     }
 
     return true;
@@ -377,14 +384,15 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     if constexpr (debug) {
         cout << "poset_del(" << id <<
             ", " << (value1 != NULL ? ("\"" + string(value1) + "\"" ) : "NULL") <<
-            ", " << (value2 != NULL ? ("\"" + string(value2) + "\"" ) : "NULL") << ")\n"; 
+            ", " << (value2 != NULL ? ("\"" + string(value2) + "\"" ) : "NULL") <<
+            ")\n"; 
     }
-
 
     if (!is_poset_present(id)) {
         if constexpr (debug) {
             cout << "poset_del: poset " << id << " does not exist\n"; 
         }
+
         return false;
     }
 
@@ -393,6 +401,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
             cout << "poset_del: invalid value1 (NULL)\n";
             cout << "poset_del: invalid value2 (NULL)\n"; 
         }
+
         return false;
     }
 
@@ -400,12 +409,15 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_del: invalid value1 (NULL)\n";
         }
+
         return false;
     }
+
     if (value2 == NULL) {
         if constexpr (debug) {
             cout << "poset_del: invalid value2 (NULL)\n"; 
         }
+
         return false;
     }
     
@@ -414,24 +426,32 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     
     if (!isStringAnElement(str1, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_del: poset " << id << ", element \"" << str1 << "\" does not exist\n"; 
+            cout << "poset_del: poset " << id << ", element \"" <<
+                    str1 << "\" does not exist\n"; 
         }
+
         return false;
     }
+
     if (!isStringAnElement(str2, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_del: poset " << id << ", element \"" << str2 << "\" does not exist\n"; 
+            cout << "poset_del: poset " << id << ", element \"" << 
+                    str2 << "\" does not exist\n"; 
         }
+
         return false;
     }
+    
     unsigned long str_id1 = get<0>(poset_set().at(id)).at(str1);
     unsigned long str_id2 = get<0>(poset_set().at(id)).at(str2);
     
     // checking if they are in relation
     if (!compareStrings(str1, str2, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_del: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") cannot be deleted\n";
+            cout << "poset_del: poset " << id << ", relation (\"" <<
+                    str1 << "\", \"" << str2 << "\") cannot be deleted\n";
         }
+
         return false;
     }
 
@@ -439,8 +459,10 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     // nie zaburzy zwrotnosci, przechodniosci i antysymetrycznosci == wont disrupt given conditions
     if (str_id1 == str_id2) {
         if constexpr (debug) {
-            cout << "poset_del: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") cannot be deleted\n";
+            cout << "poset_del: poset " << id << ", relation (\"" <<
+                    str1 << "\", \"" << str2 << "\") cannot be deleted\n";
         }
+
         return false;
     }
 
@@ -449,9 +471,12 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     for (auto i : get<1>(poset_set().at(id)).at(str_id1).second) {
         if (get<1>(poset_set().at(id)).at(i).second.find(str_id2) != 
             get<1>(poset_set().at(id)).at(i).second.end()) {
+            
             if constexpr (debug) {
-                cout << "poset_del: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") cannot be deleted\n";
+                cout << "poset_del: poset " << id << ", relation (\"" <<
+                        str1 << "\", \"" << str2 << "\") cannot be deleted\n";
             }
+
             return false;
         }
     }
@@ -460,8 +485,10 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     get<1>(poset_set().at(id)).at(str_id2).first.erase(str_id1);
 
     if constexpr (debug) {
-        cout << "poset_del: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") deleted\n";
+        cout << "poset_del: poset " << id << ", relation (\"" <<
+                str1 << "\", \"" << str2 << "\") deleted\n";
     }
+
     return true;
 }
 
@@ -477,6 +504,7 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_test: poset " << id << " does not exist\n"; 
         }
+
         return false;
     }
 
@@ -485,6 +513,7 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
             cout << "poset_test: invalid value1 (NULL)\n";
             cout << "poset_test: invalid value2 (NULL)\n"; 
         }
+
         return false;
     }
 
@@ -492,12 +521,14 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
         if constexpr (debug) {
             cout << "poset_test: invalid value1 (NULL)\n";
         }
+
         return false;
     }
     if (value2 == NULL) {
         if constexpr (debug) {
             cout << "poset_test: invalid value2 (NULL)\n"; 
         }
+
         return false;
     }
 
@@ -506,26 +537,34 @@ bool poset_test(unsigned long id, char const *value1, char const *value2) {
 
     if (!isStringAnElement(str1, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_test: poset " << id << ", element \"" << str1 << "\" does not exist\n"; 
+            cout << "poset_test: poset " << id << ", element \"" << str1 <<
+                    "\" does not exist\n"; 
         }
+
         return false;
     }
     if (!isStringAnElement(str2, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_test: poset " << id << ", element \"" << str2 << "\" does not exist\n"; 
+            cout << "poset_test: poset " << id << ", element \"" << str2 << 
+                    "\" does not exist\n"; 
         }
+
         return false;
     }
     if (!compareStrings(str1, str2, poset_set().at(id))) {
         if constexpr (debug) {
-                cout << "poset_test: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") does not exist\n";
+                cout << "poset_test: poset " << id << ", relation (\"" <<
+                        str1 << "\", \"" << str2 << "\") does not exist\n";
         }
+
         return false;
     }
 
     if constexpr (debug) {
-                cout << "poset_test: poset " << id << ", relation (\"" << str1 << "\", \"" << str2 << "\") exists\n";
+                cout << "poset_test: poset " << id << ", relation (\"" << 
+                        str1 << "\", \"" << str2 << "\") exists\n";
     }
+
     return true;
 }
 
@@ -539,6 +578,7 @@ void poset_clear(unsigned long id) {
         if constexpr (debug) {
             cout << "poset_clear: poset " << id << " does not exist\n";
         }
+
         return;
     }
 
