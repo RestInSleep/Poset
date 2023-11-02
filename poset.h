@@ -1,15 +1,12 @@
-#ifndef poset
-#define poset
+#ifndef posetH
+#define posetH
 
-#ifdef __cplusplus
-#include <iostream>
-#endif
-
-
-#include <stdlib.h>
-#include <stdbool.h>
-
-  #ifdef __cplusplus
+  #ifndef __cplusplus
+  #include <stdbool.h>
+  #include <stdlib.h>
+  
+  #else
+  #include <iostream>
 namespace cxx {
     extern "C" {
   #endif

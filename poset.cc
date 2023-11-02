@@ -1,3 +1,4 @@
+#include "poset.h"
 #include <iostream>
 #include <unordered_map>
 #include <unordered_set>
@@ -6,6 +7,8 @@
 #include <utility>
 #include <cassert>
 #include <tuple>
+
+
 
 #ifdef NDEBUG
     constexpr bool debug = false;
@@ -21,6 +24,8 @@ using std::unordered_map;
 using std::string;
 using std::get;
 using std::cout;
+using std::make_pair;
+
 
 
 namespace {
@@ -34,8 +39,8 @@ using relation_map = unordered_map<element_id, poset_relations>;
 
 /*
  poset_t = 
- 1. id_map - map from elements(string) to their id's (unsigned long)
- 2. relation_map - map from elements' id to a pair of sets: the set of 
+ 1. id_map - map from element (string) to its id (unsigned long)
+ 2. relation_map - map from element's id to a pair of sets: the set of 
  elements smaller than the element ('smaller') and the set of elements bigger
  than the element ('bigger')
  3. next unused id for potential new poset element 
@@ -110,7 +115,7 @@ void rem_aux(unsigned long pos_id, string& str, unsigned long str_id) {
     for (auto i : get<1>(poset_set().at(pos_id)).at(str_id).first) {
         get<1>(poset_set().at(pos_id)).at(i).second.erase(str_id);
     }
-    for(auto i : get<1>(poset_set().at(pos_id)).at(str_id).second) {
+    for (auto i : get<1>(poset_set().at(pos_id)).at(str_id).second) {
         get<1>(poset_set().at(pos_id)).at(i).first.erase(str_id);
     }
  
@@ -120,14 +125,20 @@ void rem_aux(unsigned long pos_id, string& str, unsigned long str_id) {
 
 }
 
+void insert_aux(unsigned long pos_id, string& str) {
+    unordered_set<unsigned long> bigger;
+    unordered_set<unsigned long> smaller;
+    unsigned long str_id = get<2>(poset_set().at(pos_id));
 
+    get<2>(poset_set().at(pos_id))++;
+    get<0>(poset_set().at(pos_id)).insert({str, str_id});
+    get<1>(poset_set().at(pos_id)).insert({str_id, make_pair(smaller, bigger)});
 }
-#ifdef __cplusplus
-namespace cxx {
-extern "C" {
-#endif
+}
 
 
+
+ namespace cxx {
 
 unsigned long poset_new(void) {
     
@@ -147,8 +158,6 @@ unsigned long poset_new(void) {
 
     return id_count++;
 }
-
-
 
 void poset_delete(unsigned long id) {
     
@@ -231,14 +240,7 @@ bool poset_insert(unsigned long id, char const *value) {
 
         return false;
      }
-
-    unordered_set<unsigned long> bigger;
-    unordered_set<unsigned long> smaller;
-    unsigned long str_id = get<2>(poset_set().at(id));
-
-    get<2>(poset_set().at(id))++;
-    get<0>(poset_set().at(id)).insert({str, str_id});
-    get<1>(poset_set().at(id)).insert({str_id, std::make_pair(smaller, bigger)});
+     insert_aux(id, str);
 
     if constexpr (debug) {
         cout << "poset_insert: poset " << id << ", element \"" << str << "\" inserted\n";
@@ -593,10 +595,6 @@ void poset_clear(unsigned long id) {
             cout << "poset_clear: poset " << id << " cleared\n";
         }
     return;
-}    
-
-#ifdef __cplusplus
-    }
-}
-#endif
+    }    
+ }
 
