@@ -46,30 +46,44 @@ using relation_map = unordered_map<element_id, poset_relations>;
  3. next unused id for potential new poset element 
  (deleting elements from poset does not change this value)
 */
-using poset_t = tuple <
-                      id_map,  
-                      relation_map,
-                      element_id
+using poset_t = tuple < id_map,       // 1
+                        relation_map, // 2
+                        element_id    // 3
                       >;
+
+
 
 using poset_id = unsigned long;
 using poset_set_t = unordered_map<poset_id, poset_t>;
 
+
+/*
+Static-initialization-fiasco-secure access to the 
+global set of posets 'poset_set'.
+*/
 poset_set_t& poset_set() {
     poset_set_t initMap;
     static poset_set_t poset_set = initMap;
     return poset_set;
 }
 
-
+/*
+Returns true iff poset with id 'id' exists.
+*/
 bool is_poset_present(unsigned long id) {
     return poset_set().find(id) != poset_set().end();
 }
 
+/*
+Returns true iff 'str' in 'poset'.
+*/
 bool is_string_an_element(const string& str, const poset_t& pos) {
    return get<0>(pos).find(str) != get<0>(pos).end();
 }
-// true if s1 <= s2
+
+/*
+Returns true iff in 'poset' s1 <= s2.
+*/
 bool compareStrings(const string& s1, string& s2, poset_t& poset) {
     if (s1 == s2)
         return true;
@@ -82,15 +96,16 @@ bool compareStrings(const string& s1, string& s2, poset_t& poset) {
     }
 
 /*
- Adds a relation between existing elements with id's 'str_id_1', 'str_id_2'
- in poset with id 'pos_id' in a transitive manner:
+ Adds a relation between existing elements with id's 'str_id_1', 
+ 'str_id_2' in poset with id 'pos_id' in a transitive manner:
  - first element is smaller than second
  - every element smaller than the first is smaller than the second
  - every element bigger than the second is bigger than the first
  - every element smaller than the first is smaller 
    than any element bigger than the second
 */
-void set_elements_relations(unsigned long pos_id, unsigned long str_id_1, unsigned long str_id_2) {
+void set_elements_relations(unsigned long pos_id, unsigned long str_id_1, 
+                            unsigned long str_id_2) {
 
     for (auto i : get<1>(poset_set().at(pos_id)).at(str_id_2).second) {
         get<1>(poset_set().at(pos_id)).at(str_id_1).second.insert(i);
@@ -109,9 +124,13 @@ void set_elements_relations(unsigned long pos_id, unsigned long str_id_1, unsign
 
     get<1>(poset_set().at(pos_id)).at(str_id_2).first.insert(str_id_1);
     get<1>(poset_set().at(pos_id)).at(str_id_1).second.insert(str_id_2);
-    
 }
 
+
+/*
+Removes element with id 'str_id' from poset with id 'poset_id' and
+every relation that the element was part of. Auxiliary to 'poset_remove'.
+*/
 void rem_aux(unsigned long pos_id, const string& str, unsigned long str_id) {
 
     for (auto i : get<1>(poset_set().at(pos_id)).at(str_id).first) {
@@ -127,6 +146,13 @@ void rem_aux(unsigned long pos_id, const string& str, unsigned long str_id) {
 
 }
 
+
+
+
+/*
+Inserts element 'str' to poset with id 'pos_id'.
+Auxiliary to poset_insert.
+*/
 void insert_aux(unsigned long pos_id, const string& str) {
    
     unordered_set<unsigned long> bigger;
@@ -135,14 +161,21 @@ void insert_aux(unsigned long pos_id, const string& str) {
 
     get<2>(poset_set().at(pos_id))++;
     get<0>(poset_set().at(pos_id)).insert({str, str_id});
-    get<1>(poset_set().at(pos_id)).insert({str_id, make_pair(smaller, bigger)});
+    get<1>(poset_set().at(pos_id)).insert({str_id, 
+                                           make_pair(smaller, bigger)});
 }
 
 
-bool check_null_two_args(const string& function_name, char const *value1, char const *value2) {
 
+
+/*
+Inserts element 'str' to poset with id 'pos_id'.
+Auxiliary to poset_insert.
+*/
+bool check_null_two_args(const string& function_name, char const *value1, 
+                                                      char const *value2) {
+    
     bool res = true;
-   
     if (value1 == NULL) {
         if constexpr (debug) {
             cout << function_name << ": invalid value1 (NULL)\n";
@@ -156,14 +189,13 @@ bool check_null_two_args(const string& function_name, char const *value1, char c
         res = false;
     }
     return res;
- }
-
-
-
+    }
 }
 
 
-
+/*
+Functions provided by the module.
+*/
  namespace cxx {
     
 unsigned long poset_new(void) {
@@ -185,7 +217,9 @@ unsigned long poset_new(void) {
 }
 
 
-
+/*
+Deletes poset with id 'id' from 'poset_set'.
+*/
 void poset_delete(unsigned long id) {
     
     if constexpr (debug) {
@@ -220,7 +254,8 @@ size_t poset_size(unsigned long id) {
          size = get<0>(poset_set().at(id)).size();
 
         if constexpr (debug) {
-            cout << "poset_size: poset " << id << " contains " << size << " element(s)\n";
+            cout << "poset_size: poset " << id 
+            << " contains " << size << " element(s)\n";
         }
     }
     else {
@@ -262,7 +297,8 @@ bool poset_insert(unsigned long id, char const *value) {
     if (is_string_an_element(str, poset_set().at(id))) {
        
         if constexpr (debug) {
-            cout << "poset_insert: poset " << id << ", element \"" << str <<"\" already exists\n";
+            cout << "poset_insert: poset " << id << ", element \"" 
+            << str <<"\" already exists\n";
         }
 
         return false;
@@ -303,13 +339,13 @@ bool poset_remove(unsigned long id, char const *value) {
 
     if (!is_string_an_element(str, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_remove: poset " << id <<", element \"" << str << "\" does not exist\n";
+            cout << "poset_remove: poset " << id 
+            << ", element \"" << str << "\" does not exist\n";
         }
 
         return false;
     }
 
-    // the id of element being deleted
     unsigned long str_id = get<0>(poset_set().at(id)).at(str);
     
     rem_aux(id, str, str_id);
@@ -324,9 +360,11 @@ bool poset_remove(unsigned long id, char const *value) {
 bool poset_add(unsigned long id, char const *value1, char const *value2) {
     
     if constexpr (debug) {
-        cout << "poset_add(" << id << 
-        ", " << (value1 != NULL ? ("\"" + string(value1) + "\"" ) : "NULL") << 
-        ", " << (value2 != NULL ? ("\"" + string(value2) + "\"" ) : "NULL") << ")\n"; 
+        cout << "poset_add(" << id <<  ", " 
+        << (value1 != NULL ? ("\"" + string(value1) + "\"" ) : "NULL") << 
+        ", " 
+        << (value2 != NULL ? ("\"" + string(value2) + "\"" ) : "NULL") 
+        << ")\n"; 
     }
 
     if (!is_poset_present(id)) {
@@ -354,7 +392,8 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
    
     if (!is_string_an_element(str2, poset_set().at(id))) {
         if constexpr (debug) {
-            cout << "poset_add: poset " << id << ", element \"" << str2 << "\" does not exist\n"; 
+            cout << "poset_add: poset " << id 
+            << ", element \"" << str2 << "\" does not exist\n"; 
         }
 
         return false;
@@ -363,7 +402,7 @@ bool poset_add(unsigned long id, char const *value1, char const *value2) {
     unsigned long str_id1 = get<0>(poset_set().at(id)).at(str1);
     unsigned long str_id2 = get<0>(poset_set().at(id)).at(str2);
 
-    //check if elements are in a relation
+
     if (compareStrings(str1, str2, poset_set().at(id)) or
         compareStrings(str2, str1, poset_set().at(id))) {
 
@@ -433,7 +472,10 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
     unsigned long str_id1 = get<0>(poset_set().at(id)).at(str1);
     unsigned long str_id2 = get<0>(poset_set().at(id)).at(str2);
     
-    // checking if they are in relation
+    /* 
+    Checking if the relation exists.
+    If not, then the relation can't be deleted.
+    */
     if (!compareStrings(str1, str2, poset_set().at(id))) {
         if constexpr (debug) {
             cout << "poset_del: poset " << id << ", relation (\"" <<
@@ -443,8 +485,10 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
         return false;
     }
 
-    // checking if removing relation between them
-    //  wont disrupt given conditions
+    /* 
+    Checking if removing relation between them
+    wont defy antisymmetry and transitivity.
+    */
     if (str_id1 == str_id2) {
         if constexpr (debug) {
             cout << "poset_del: poset " << id << ", relation (\"" <<
@@ -454,8 +498,10 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
         return false;
     }
 
-    // checking if there exists an element x such that
-    // str1 < x < str2
+    /*
+    Checking if there exists an element x such that
+    str1 < x < str2. If not, then the relation can't be deleted.
+    */
     for (auto i : get<1>(poset_set().at(id)).at(str_id1).second) {
         if (get<1>(poset_set().at(id)).at(i).second.find(str_id2) != 
             get<1>(poset_set().at(id)).at(i).second.end()) {
@@ -478,6 +524,7 @@ bool poset_del(unsigned long id, char const *value1, char const *value2) {
 
     return true;
 }
+
 
 bool poset_test(unsigned long id, char const *value1, char const *value2) {
 
